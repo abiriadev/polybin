@@ -25,7 +25,7 @@ export default function ViewPastePage() {
 
 	if (loading) {
 		return (
-			<div className="flex min-h-screen items-center justify-center">
+			<div className="flex min-h-screen items-center justify-center bg-background text-foreground">
 				<div className="text-lg">Loading...</div>
 			</div>
 		)
@@ -33,8 +33,8 @@ export default function ViewPastePage() {
 
 	if (error) {
 		return (
-			<div className="flex min-h-screen items-center justify-center p-4">
-				<div className="rounded-lg bg-red-50 p-4 text-red-700">
+			<div className="flex min-h-screen items-center justify-center bg-background p-4">
+				<div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-4 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
 					<h2 className="text-lg font-bold">Error</h2>
 					<p>{error}</p>
 					<a
@@ -50,32 +50,34 @@ export default function ViewPastePage() {
 
 	if (!paste) {
 		return (
-			<div className="flex min-h-screen items-center justify-center p-4">
+			<div className="flex min-h-screen items-center justify-center bg-background text-foreground p-4">
 				<div className="text-lg">Paste not found</div>
 			</div>
 		)
 	}
 
 	return (
-		<div className="mx-auto max-w-4xl p-4">
-			<div className="mb-4 flex items-center justify-between border-b pb-2">
-				<div>
-					<h1 className="text-xl font-bold">Paste: {paste.id}</h1>
-					<p className="text-sm text-gray-500">
-						Created at: {paste.createdAt.toLocaleString()}
-					</p>
+		<div className="min-h-screen bg-background text-foreground">
+			<div className="mx-auto max-w-4xl p-4">
+				<div className="mb-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-2">
+					<div>
+						<h1 className="text-xl font-bold">Paste: {paste.id}</h1>
+						<p className="text-sm text-zinc-500">
+							Created at: {paste.createdAt.toLocaleString()}
+						</p>
+					</div>
+					<a
+						href="/"
+						className="rounded bg-zinc-100 dark:bg-zinc-800 px-4 py-2 text-sm hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+					>
+						New Paste
+					</a>
 				</div>
-				<a
-					href="/"
-					className="rounded bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200"
-				>
-					New Paste
-				</a>
-			</div>
-			<div className="rounded bg-gray-50 p-4">
-				<pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono text-sm">
-					{paste.content}
-				</pre>
+				<div className="rounded bg-zinc-50 dark:bg-zinc-900 p-4 border border-zinc-200 dark:border-zinc-800">
+					<pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono text-sm">
+						{paste.content}
+					</pre>
+				</div>
 			</div>
 		</div>
 	)

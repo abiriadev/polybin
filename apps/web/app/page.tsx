@@ -26,14 +26,12 @@ export default function Home() {
 	}
 
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black p-4">
+		<div className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground font-sans p-4">
 			<main className="flex w-full max-w-4xl flex-col gap-6">
-				<h1 className="text-3xl font-bold text-black dark:text-zinc-50">
-					Polybin
-				</h1>
+				<h1 className="text-3xl font-bold">Polybin</h1>
 				<form onSubmit={handleSubmit} className="flex flex-col gap-4">
 					<textarea
-						className="w-full min-h-[400px] p-4 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-black dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm resize-y"
+						className="w-full min-h-[400px] p-4 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm resize-y"
 						placeholder="Paste your content here..."
 						value={content}
 						onChange={e => setContent(e.target.value)}
