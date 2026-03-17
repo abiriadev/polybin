@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react'
 import { api, Paste } from '../../lib/api'
 import Markdown from 'react-markdown'
 import { Calendar, FileText, ChevronLeft } from 'lucide-react'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 export default function ViewPastePage() {
 	const params = useParams()
@@ -83,7 +87,7 @@ export default function ViewPastePage() {
 					</div>
 				</div>
 				<article className="prose prose-zinc dark:prose-invert max-w-none">
-					<Markdown>{paste.content}</Markdown>
+					<Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{paste.content}</Markdown>
 				</article>
 			</div>
 		</div>
