@@ -4,8 +4,8 @@ import { version } from '../package.json'
 import { app as pasteApp } from './pastes'
 import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
-import { Db } from '@/db'
-import type { InjectedEnv } from '@/env'
+import { Db } from './db'
+import type { InjectedEnv } from './env'
 
 const app = new OpenAPIHono<InjectedEnv>()
 export default app

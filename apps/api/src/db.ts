@@ -1,4 +1,4 @@
-import type { PasteBase, PasteNew, PasteUpdate } from '@/schemas'
+import type { PasteBase, PasteNew, PasteUpdate } from './schemas'
 
 export class Db {
 	#driver: D1Database
