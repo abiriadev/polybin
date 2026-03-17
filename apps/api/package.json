@@ -4,13 +4,15 @@
 	"type": "module",
 	"main": "src/index.ts",
 	"scripts": {
-		"start:dev": "wrangler dev"
+		"start:dev": "wrangler dev",
+		"test": "vitest run"
 	},
 	"devDependencies": {
 		"@hono/swagger-ui": "^0.6.1",
 		"prettier": "^3.8.1",
 		"tsx": "^4.21.0",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"vitest": "^3.0.7"
 	},
 	"dependencies": {
 		"@hono/zod-openapi": "^1.2.2",
