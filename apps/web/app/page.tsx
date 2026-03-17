@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { api } from './lib/api'
+import Markdown from 'react-markdown'
 
 export default function Home() {
 	const [content, setContent] = useState('')
@@ -34,23 +35,25 @@ export default function Home() {
 					<div className="flex border-b border-zinc-300 dark:border-zinc-700">
 						<button
 							type="button"
-							className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
-								activeTab === 'write'
+							className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'write'
 									? 'border-blue-500 text-blue-600 dark:text-blue-400'
 									: 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-							}`}
+								}`}
 							onClick={() => setActiveTab('write')}
 						>
 							Write
 						</button>
 						<button
 							type="button"
-							className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
-								activeTab === 'preview'
+							className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${activeTab === 'preview'
 									? 'border-blue-500 text-blue-600 dark:text-blue-400'
 									: 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-							}`}
-							onClick={() => setActiveTab('preview')}
+								}`}
+							onClick={() => {
+								console.log('Preview clicked')
+
+								setActiveTab('preview')
+							}}
 						>
 							Preview
 						</button>
@@ -65,8 +68,12 @@ export default function Home() {
 							disabled={isSubmitting}
 						/>
 					) : (
-						<div className="w-full min-h-[400px] p-4 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-foreground font-mono text-sm overflow-auto whitespace-pre-wrap break-all">
-							{content || (
+						<div className="w-full min-h-[400px] p-4 md:p-8 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-foreground overflow-auto">
+							{content ? (
+								<article className="prose prose-zinc dark:prose-invert max-w-none">
+									<Markdown>{content}</Markdown>
+								</article>
+							) : (
 								<span className="text-zinc-400 italic">
 									Nothing to preview
 								</span>

@@ -3,6 +3,8 @@
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { api, Paste } from '../../lib/api'
+import Markdown from 'react-markdown'
+import { Calendar, FileText, ChevronLeft } from 'lucide-react'
 
 export default function ViewPastePage() {
 	const params = useParams()
@@ -58,26 +60,31 @@ export default function ViewPastePage() {
 
 	return (
 		<div className="min-h-screen bg-background text-foreground">
-			<div className="mx-auto max-w-4xl p-4">
-				<div className="mb-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-2">
-					<div>
-						<h1 className="text-xl font-bold">Paste: {paste.id}</h1>
-						<p className="text-sm text-zinc-500">
-							Created at: {paste.createdAt.toLocaleString()}
-						</p>
+			<div className="mx-auto max-w-4xl p-4 md:p-8">
+				<div className="mb-8 flex flex-col gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-6">
+					<div className="flex items-center justify-between">
+						<a
+							href="/"
+							className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
+						>
+							<ChevronLeft size={16} />
+							New Paste
+						</a>
 					</div>
-					<a
-						href="/"
-						className="rounded bg-zinc-100 dark:bg-zinc-800 px-4 py-2 text-sm hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-					>
-						New Paste
-					</a>
+					<div className="flex flex-col gap-2">
+						<h1 className="text-2xl font-bold flex items-center gap-2">
+							<FileText className="text-blue-500" size={24} />
+							{paste.id}
+						</h1>
+						<div className="flex items-center gap-2 text-sm text-zinc-500">
+							<Calendar size={14} />
+							<span>{paste.createdAt.toLocaleString()}</span>
+						</div>
+					</div>
 				</div>
-				<div className="rounded bg-zinc-50 dark:bg-zinc-900 p-4 border border-zinc-200 dark:border-zinc-800">
-					<pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono text-sm">
-						{paste.content}
-					</pre>
-				</div>
+				<article className="prose prose-zinc dark:prose-invert max-w-none">
+					<Markdown>{paste.content}</Markdown>
+				</article>
 			</div>
 		</div>
 	)
