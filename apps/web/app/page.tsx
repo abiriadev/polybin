@@ -7,6 +7,7 @@ import { api } from './lib/api'
 export default function Home() {
 	const [content, setContent] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [activeTab, setActiveTab] = useState<'write' | 'preview'>('write')
 	const router = useRouter()
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -30,13 +31,48 @@ export default function Home() {
 			<main className="flex w-full max-w-4xl flex-col gap-6">
 				<h1 className="text-3xl font-bold">Polybin</h1>
 				<form onSubmit={handleSubmit} className="flex flex-col gap-4">
-					<textarea
-						className="w-full min-h-[400px] p-4 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm resize-y"
-						placeholder="Paste your content here..."
-						value={content}
-						onChange={e => setContent(e.target.value)}
-						disabled={isSubmitting}
-					/>
+					<div className="flex border-b border-zinc-300 dark:border-zinc-700">
+						<button
+							type="button"
+							className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+								activeTab === 'write'
+									? 'border-blue-500 text-blue-600 dark:text-blue-400'
+									: 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+							}`}
+							onClick={() => setActiveTab('write')}
+						>
+							Write
+						</button>
+						<button
+							type="button"
+							className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+								activeTab === 'preview'
+									? 'border-blue-500 text-blue-600 dark:text-blue-400'
+									: 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+							}`}
+							onClick={() => setActiveTab('preview')}
+						>
+							Preview
+						</button>
+					</div>
+
+					{activeTab === 'write' ? (
+						<textarea
+							className="w-full min-h-[400px] p-4 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm resize-y"
+							placeholder="Paste your content here..."
+							value={content}
+							onChange={e => setContent(e.target.value)}
+							disabled={isSubmitting}
+						/>
+					) : (
+						<div className="w-full min-h-[400px] p-4 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-foreground font-mono text-sm overflow-auto whitespace-pre-wrap break-all">
+							{content || (
+								<span className="text-zinc-400 italic">
+									Nothing to preview
+								</span>
+							)}
+						</div>
+					)}
 					<div className="flex justify-end">
 						<button
 							type="submit"
