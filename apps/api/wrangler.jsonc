@@ -1,0 +1,11 @@
+{
+	"main": "./src/index.ts",
+	"compatibility_date": "2026-03-16",
+	"d1_databases": [
+		{
+			"binding": "db",
+			"database_name": "polybin",
+			"database_id": "6168f8d8-0b53-4845-8cd9-a71a9d06465a"
+		}
+	]
+}
