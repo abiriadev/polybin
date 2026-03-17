@@ -65,7 +65,7 @@ const createPasteRoute = createRoute({
 app.openapi(createPasteRoute, async c => {
 	const body: PasteNew = c.req.valid('json')
 
-	const result = await c.get('db').createPate(body)
+	const result = await c.get('db').createPaste(body)
 
 	return c.json(result, 200)
 })

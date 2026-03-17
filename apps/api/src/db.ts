@@ -19,7 +19,7 @@ export class Db {
 			.run()
 	}
 
-	async createPate(pasteNew: PasteNew): Promise<PasteBase> {
+	async createPaste(pasteNew: PasteNew): Promise<PasteBase> {
 		const result = await this.#driver
 			.prepare(`insert into pastes (content) values (?) returning *`)
 			.bind(pasteNew.content)
@@ -50,7 +50,7 @@ export class Db {
 		return result.results.map(paste => ({
 			id: paste.id.toString(),
 			content: paste.content,
-			createdAt: new Date(paste.createdAt),
+			createdAt: new Date(paste.created_at),
 		}))
 	}
 
