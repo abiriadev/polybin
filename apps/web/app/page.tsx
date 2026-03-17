@@ -9,6 +9,10 @@ import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { githubDark, githubLight } from '@uiw/codemirror-theme-github'
 import { useTheme } from './hooks/useTheme'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 export default function Home() {
 	const [content, setContent] = useState('')
@@ -81,7 +85,7 @@ export default function Home() {
 						<div className="w-full min-h-[400px] p-4 md:p-8 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-foreground overflow-auto">
 							{content ? (
 								<article className="prose prose-zinc dark:prose-invert max-w-none">
-									<Markdown>{content}</Markdown>
+									<Markdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{content}</Markdown>
 								</article>
 							) : (
 								<span className="text-zinc-400 italic">
