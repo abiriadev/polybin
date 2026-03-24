@@ -1,10 +1,9 @@
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { swaggerUI } from '@hono/swagger-ui'
 import { version } from '../package.json'
-import { app as pasteApp } from './paste.controller'
-import { app as userApp } from './user.controller'
 import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
+import { app as apiApp } from './api'
 import { Db } from './db'
 import type { InjectedEnv } from './env'
 
@@ -42,5 +41,4 @@ app.get(
 	}),
 )
 
-app.route('/api/pastes', pasteApp)
-app.route('/api/users', userApp)
+app.route('/api', apiApp)
