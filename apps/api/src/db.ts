@@ -15,14 +15,14 @@ export class Db {
 					id integer primary key,
 					content text,
 					created_at text default current_timestamp
-				)
+				);
 
 				create table if not exists users (
 					id integer primary key,
 					name text unique,
 					hash text,
 					created_at text default current_timestamp
-				)
+				);
 				`,
 			)
 			.run()
