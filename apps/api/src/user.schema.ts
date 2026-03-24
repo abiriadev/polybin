@@ -19,3 +19,14 @@ export const userNewSchem = userBaseSchema
 export type UserNew = z.infer<typeof userNewSchem>
 
 export type UserNewWithHash = Omit<UserNew, 'password'> & { hash: string }
+
+export const userPasswordUpdateSchema = z
+	.object({
+		oldPassword: z.string(),
+		newPassword: z.string(),
+	})
+	.openapi('PasteUpdate')
+
+export type UserPasswordUpdate = z.infer<typeof userPasswordUpdateSchema>
+
+export type UserPasswordUpdateWithHash = { hash: string }
