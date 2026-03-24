@@ -1,4 +1,5 @@
 import type { PasteBase, PasteNew, PasteUpdate } from './schemas'
+import type { UserBase, UserNew } from './user.schema'
 
 export class Db {
 	#driver: D1Database
@@ -14,7 +15,15 @@ export class Db {
 					id integer primary key,
 					content text,
 					created_at text default current_timestamp
-				)`,
+				)
+
+				create table if not exists users (
+					id integer primary key,
+					name text unique,
+					hash text,
+					created_at text default current_timestamp
+				)
+				`,
 			)
 			.run()
 	}
@@ -110,6 +119,79 @@ export class Db {
 		return {
 			id: result.id.toString(),
 			content: result.content,
+			createdAt: new Date(result.created_at),
+		}
+	}
+
+	async createUser(userNew: UserNew): Promise<UserBase> {
+		const result = await this.#driver
+			.prepare(`insert into users (name) values (?) returning *`)
+			.bind(userNew.name)
+			.first<{
+				id: number
+				name: string
+				created_at: string
+			}>()
+
+		if (!result) throw new Error('Failed to create user')
+
+		return {
+			id: result.id.toString(),
+			name: result.name,
+			createdAt: new Date(result.created_at),
+		}
+	}
+
+	async listUsers(): Promise<UserBase[]> {
+		const result = await this.#driver.prepare(`select * from users`).run<{
+			id: number
+			name: string
+			created_at: string
+		}>()
+
+		if (!result.success) throw new Error('Failed to list users')
+
+		return result.results.map(user => ({
+			id: user.id.toString(),
+			name: user.name,
+			createdAt: new Date(user.created_at),
+		}))
+	}
+
+	async getUser(id: string): Promise<UserBase> {
+		const result = await this.#driver
+			.prepare(`select * from users where id = ?`)
+			.bind(id)
+			.first<{
+				id: number
+				name: string
+				created_at: string
+			}>()
+
+		if (!result) throw new Error('Failed to get user')
+
+		return {
+			id: result.id.toString(),
+			name: result.name,
+			createdAt: new Date(result.created_at),
+		}
+	}
+
+	async deleteUser(id: string): Promise<UserBase> {
+		const result = await this.#driver
+			.prepare(`delete from users where id = ? returning *`)
+			.bind(id)
+			.first<{
+				id: number
+				name: string
+				created_at: string
+			}>()
+
+		if (!result) throw new Error('Failed to delete user')
+
+		return {
+			id: result.id.toString(),
+			name: result.name,
 			createdAt: new Date(result.created_at),
 		}
 	}
