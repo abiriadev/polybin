@@ -7,6 +7,8 @@ import {
 } from './user.schema'
 import type { InjectedEnv } from './env'
 import { Hashed } from './hash'
+import { apiSuccessResponseSchemaFactory } from './schemas'
+import { r } from './utils'
 
 const idSchema = z.string().openapi({
 	param: {
@@ -25,7 +27,9 @@ const listUserRoute = createRoute({
 			description: 'Success',
 			content: {
 				'application/json': {
-					schema: userBaseSchema.array(),
+					schema: apiSuccessResponseSchemaFactory(
+						userBaseSchema.array(),
+					),
 				},
 			},
 		},
@@ -35,7 +39,7 @@ const listUserRoute = createRoute({
 app.openapi(listUserRoute, async c => {
 	const result = await c.get('db').listUsers()
 
-	return c.json(result, 200)
+	return c.json(r(result), 200)
 })
 
 const createUserRoute = createRoute({
@@ -56,7 +60,7 @@ const createUserRoute = createRoute({
 			description: 'Success',
 			content: {
 				'application/json': {
-					schema: userBaseSchema,
+					schema: apiSuccessResponseSchemaFactory(userBaseSchema),
 				},
 			},
 		},
@@ -74,7 +78,7 @@ app.openapi(createUserRoute, async c => {
 		hash,
 	})
 
-	return c.json(result, 200)
+	return c.json(r(result), 200)
 })
 
 const getUserRoute = createRoute({
@@ -90,7 +94,7 @@ const getUserRoute = createRoute({
 			description: 'Success',
 			content: {
 				'application/json': {
-					schema: userBaseSchema,
+					schema: apiSuccessResponseSchemaFactory(userBaseSchema),
 				},
 			},
 		},
@@ -102,7 +106,7 @@ app.openapi(getUserRoute, async c => {
 
 	const result = await c.get('db').getUser(params.id)
 
-	return c.json(result, 200)
+	return c.json(r(result), 200)
 })
 
 const updateUserPasswordRoute = createRoute({

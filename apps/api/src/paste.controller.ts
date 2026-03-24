@@ -6,6 +6,8 @@ import {
 	pasteUpdateSchema,
 } from './paste.schema'
 import type { InjectedEnv } from './env'
+import { apiSuccessResponseSchemaFactory } from './schemas'
+import { r } from './utils'
 
 const idSchema = z.string().openapi({
 	param: {
@@ -24,7 +26,9 @@ const listPastesRoute = createRoute({
 			description: 'Success',
 			content: {
 				'application/json': {
-					schema: pasteBaseSchema.array(),
+					schema: apiSuccessResponseSchemaFactory(
+						pasteBaseSchema.array(),
+					),
 				},
 			},
 		},
@@ -34,7 +38,7 @@ const listPastesRoute = createRoute({
 app.openapi(listPastesRoute, async c => {
 	const result = await c.get('db').listPastes()
 
-	return c.json(result, 200)
+	return c.json(r(result), 200)
 })
 
 const createPasteRoute = createRoute({
@@ -55,7 +59,7 @@ const createPasteRoute = createRoute({
 			description: 'Success',
 			content: {
 				'application/json': {
-					schema: pasteBaseSchema,
+					schema: apiSuccessResponseSchemaFactory(pasteBaseSchema),
 				},
 			},
 		},
@@ -67,7 +71,7 @@ app.openapi(createPasteRoute, async c => {
 
 	const result = await c.get('db').createPaste(body)
 
-	return c.json(result, 200)
+	return c.json(r(result), 200)
 })
 
 const getPasteRoute = createRoute({
@@ -83,7 +87,7 @@ const getPasteRoute = createRoute({
 			description: 'Success',
 			content: {
 				'application/json': {
-					schema: pasteBaseSchema,
+					schema: apiSuccessResponseSchemaFactory(pasteBaseSchema),
 				},
 			},
 		},
@@ -95,7 +99,7 @@ app.openapi(getPasteRoute, async c => {
 
 	const result = await c.get('db').getPaste(params.id)
 
-	return c.json(result, 200)
+	return c.json(r(result), 200)
 })
 
 const updatePasteRoute = createRoute({
@@ -119,7 +123,7 @@ const updatePasteRoute = createRoute({
 			description: 'Success',
 			content: {
 				'application/json': {
-					schema: pasteBaseSchema,
+					schema: apiSuccessResponseSchemaFactory(pasteBaseSchema),
 				},
 			},
 		},
@@ -132,7 +136,7 @@ app.openapi(updatePasteRoute, async c => {
 
 	const result = await c.get('db').updatePaste(params.id, body)
 
-	return c.json(result, 200)
+	return c.json(r(result), 200)
 })
 
 const deletePasteRoute = createRoute({
