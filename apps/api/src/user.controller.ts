@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { userBaseSchema, userNewSchem, type UserNew } from './user.schema'
 import type { InjectedEnv } from './env'
+import { Hashed } from './hash'
 
 const idSchema = z.string().openapi({
 	param: {
@@ -58,9 +59,15 @@ const createUserRoute = createRoute({
 })
 
 app.openapi(createUserRoute, async c => {
-	const body: UserNew = c.req.valid('json')
+	const { password, ...userNew }: UserNew = c.req.valid('json')
 
-	const result = await c.get('db').createUser(body)
+	const hashed = await Hashed.computeHash(password)
+	const hash = hashed.serialize()
+
+	const result = await c.get('db').createUser({
+		...userNew,
+		hash,
+	})
 
 	return c.json(result, 200)
 })

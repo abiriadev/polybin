@@ -1,5 +1,5 @@
 import type { PasteBase, PasteNew, PasteUpdate } from './schemas'
-import type { UserBase, UserNew } from './user.schema'
+import type { UserBase, UserNew, UserNewWithHash } from './user.schema'
 
 export class Db {
 	#driver: D1Database
@@ -123,10 +123,10 @@ export class Db {
 		}
 	}
 
-	async createUser(userNew: UserNew): Promise<UserBase> {
+	async createUser(userNew: UserNewWithHash): Promise<UserBase> {
 		const result = await this.#driver
-			.prepare(`insert into users (name) values (?) returning *`)
-			.bind(userNew.name)
+			.prepare(`insert into users (name, hash) values (?, ?) returning *`)
+			.bind(userNew.name, userNew.hash)
 			.first<{
 				id: number
 				name: string
