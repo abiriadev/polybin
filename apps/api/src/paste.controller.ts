@@ -7,7 +7,7 @@ import {
 } from './paste.schema'
 import type { InjectedEnv } from './env'
 import { apiSuccessResponseSchemaFactory } from './schemas'
-import { r } from './utils'
+import { apiSuccess, r } from './utils'
 
 const idSchema = z.string().openapi({
 	param: {
@@ -21,18 +21,7 @@ export const app = new OpenAPIHono<InjectedEnv>()
 const listPastesRoute = createRoute({
 	method: 'get',
 	path: '/',
-	responses: {
-		200: {
-			description: 'Success',
-			content: {
-				'application/json': {
-					schema: apiSuccessResponseSchemaFactory(
-						pasteBaseSchema.array(),
-					),
-				},
-			},
-		},
-	},
+	responses: { 200: apiSuccess(pasteBaseSchema.array()) },
 })
 
 app.openapi(listPastesRoute, async c => {
@@ -54,16 +43,7 @@ const createPasteRoute = createRoute({
 			},
 		},
 	},
-	responses: {
-		200: {
-			description: 'Success',
-			content: {
-				'application/json': {
-					schema: apiSuccessResponseSchemaFactory(pasteBaseSchema),
-				},
-			},
-		},
-	},
+	responses: { 200: apiSuccess(pasteBaseSchema) },
 })
 
 app.openapi(createPasteRoute, async c => {
@@ -82,16 +62,7 @@ const getPasteRoute = createRoute({
 			id: idSchema,
 		}),
 	},
-	responses: {
-		200: {
-			description: 'Success',
-			content: {
-				'application/json': {
-					schema: apiSuccessResponseSchemaFactory(pasteBaseSchema),
-				},
-			},
-		},
-	},
+	responses: { 200: apiSuccess(pasteBaseSchema) },
 })
 
 app.openapi(getPasteRoute, async c => {
@@ -118,16 +89,7 @@ const updatePasteRoute = createRoute({
 			},
 		},
 	},
-	responses: {
-		200: {
-			description: 'Success',
-			content: {
-				'application/json': {
-					schema: apiSuccessResponseSchemaFactory(pasteBaseSchema),
-				},
-			},
-		},
-	},
+	responses: { 200: apiSuccess(pasteBaseSchema) },
 })
 
 app.openapi(updatePasteRoute, async c => {
@@ -147,11 +109,7 @@ const deletePasteRoute = createRoute({
 			id: idSchema,
 		}),
 	},
-	responses: {
-		204: {
-			description: 'Success',
-		},
-	},
+	responses: { 204: { description: 'Success' } },
 })
 
 app.openapi(deletePasteRoute, async c => {

@@ -8,7 +8,7 @@ import {
 import type { InjectedEnv } from './env'
 import { Hashed } from './hash'
 import { apiSuccessResponseSchemaFactory } from './schemas'
-import { r } from './utils'
+import { apiSuccess, r } from './utils'
 
 const idSchema = z.string().openapi({
 	param: {
@@ -22,18 +22,7 @@ export const app = new OpenAPIHono<InjectedEnv>()
 const listUserRoute = createRoute({
 	method: 'get',
 	path: '/',
-	responses: {
-		200: {
-			description: 'Success',
-			content: {
-				'application/json': {
-					schema: apiSuccessResponseSchemaFactory(
-						userBaseSchema.array(),
-					),
-				},
-			},
-		},
-	},
+	responses: { 200: apiSuccess(userBaseSchema.array()) },
 })
 
 app.openapi(listUserRoute, async c => {
@@ -55,16 +44,7 @@ const createUserRoute = createRoute({
 			},
 		},
 	},
-	responses: {
-		200: {
-			description: 'Success',
-			content: {
-				'application/json': {
-					schema: apiSuccessResponseSchemaFactory(userBaseSchema),
-				},
-			},
-		},
-	},
+	responses: { 200: apiSuccess(userBaseSchema) },
 })
 
 app.openapi(createUserRoute, async c => {
@@ -89,16 +69,7 @@ const getUserRoute = createRoute({
 			id: idSchema,
 		}),
 	},
-	responses: {
-		200: {
-			description: 'Success',
-			content: {
-				'application/json': {
-					schema: apiSuccessResponseSchemaFactory(userBaseSchema),
-				},
-			},
-		},
-	},
+	responses: { 200: apiSuccess(userBaseSchema) },
 })
 
 app.openapi(getUserRoute, async c => {
@@ -162,11 +133,7 @@ const deleteUserRoute = createRoute({
 			id: idSchema,
 		}),
 	},
-	responses: {
-		204: {
-			description: 'Success',
-		},
-	},
+	responses: { 204: { description: 'Success' } },
 })
 
 app.openapi(deleteUserRoute, async c => {
