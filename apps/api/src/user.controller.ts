@@ -9,6 +9,7 @@ import type { InjectedEnv } from './env'
 import { Hashed } from './hash'
 import { apiFailure, apiSuccess, body, r } from './utils'
 import { idSchema } from './schemas'
+import { verifyPassword } from './auth.service'
 
 export const app = new OpenAPIHono<InjectedEnv>()
 
@@ -80,11 +81,7 @@ app.openapi(updateUserPasswordRoute, async c => {
 	const { db } = c.var
 
 	// check previous hash first
-	const hash = await db.getUserHash(params.id)
-
-	const hashed = Hashed.deserialize(hash)
-
-	if (!(await hashed.verify(body.oldPassword)))
+	if (!(await verifyPassword(db, params.id, body.oldPassword)))
 		return c.json(r(null, 'Incorrect password'), 403)
 
 	// set new password
