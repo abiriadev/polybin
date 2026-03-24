@@ -177,6 +177,25 @@ export class Db {
 		}
 	}
 
+	async getUserByName(name: string): Promise<UserBase> {
+		const result = await this.#driver
+			.prepare(`select * from users where name = ?`)
+			.bind(name)
+			.first<{
+				id: number
+				name: string
+				created_at: string
+			}>()
+
+		if (!result) throw new Error('Failed to get user by name')
+
+		return {
+			id: result.id.toString(),
+			name: result.name,
+			createdAt: new Date(result.created_at),
+		}
+	}
+
 	async getUserHash(id: string): Promise<string> {
 		const result = await this.#driver
 			.prepare(`select hash from users where id = ?`)
