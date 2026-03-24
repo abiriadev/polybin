@@ -7,8 +7,7 @@ import {
 } from './user.schema'
 import type { InjectedEnv } from './env'
 import { Hashed } from './hash'
-import { apiSuccessResponseSchemaFactory } from './schemas'
-import { apiSuccess, r } from './utils'
+import { apiSuccess, body, r } from './utils'
 
 const idSchema = z.string().openapi({
 	param: {
@@ -34,16 +33,7 @@ app.openapi(listUserRoute, async c => {
 const createUserRoute = createRoute({
 	method: 'post',
 	path: '/',
-	request: {
-		body: {
-			required: true,
-			content: {
-				'application/json': {
-					schema: userNewSchem,
-				},
-			},
-		},
-	},
+	request: { body: body(userNewSchem) },
 	responses: { 200: apiSuccess(userBaseSchema) },
 })
 
@@ -64,11 +54,7 @@ app.openapi(createUserRoute, async c => {
 const getUserRoute = createRoute({
 	method: 'get',
 	path: '/:id',
-	request: {
-		params: z.object({
-			id: idSchema,
-		}),
-	},
+	request: { params: z.object({ id: idSchema }) },
 	responses: { 200: apiSuccess(userBaseSchema) },
 })
 
@@ -84,17 +70,8 @@ const updateUserPasswordRoute = createRoute({
 	method: 'patch',
 	path: '/:id/password',
 	request: {
-		params: z.object({
-			id: idSchema,
-		}),
-		body: {
-			required: true,
-			content: {
-				'application/json': {
-					schema: userPasswordUpdateSchema,
-				},
-			},
-		},
+		params: z.object({ id: idSchema }),
+		body: body(userPasswordUpdateSchema),
 	},
 	responses: {
 		200: { description: 'Success' },
@@ -128,11 +105,7 @@ app.openapi(updateUserPasswordRoute, async c => {
 const deleteUserRoute = createRoute({
 	method: 'delete',
 	path: '/:id',
-	request: {
-		params: z.object({
-			id: idSchema,
-		}),
-	},
+	request: { params: z.object({ id: idSchema }) },
 	responses: { 204: { description: 'Success' } },
 })
 

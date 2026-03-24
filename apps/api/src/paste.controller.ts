@@ -6,8 +6,7 @@ import {
 	pasteUpdateSchema,
 } from './paste.schema'
 import type { InjectedEnv } from './env'
-import { apiSuccessResponseSchemaFactory } from './schemas'
-import { apiSuccess, r } from './utils'
+import { apiSuccess, body, r } from './utils'
 
 const idSchema = z.string().openapi({
 	param: {
@@ -33,16 +32,7 @@ app.openapi(listPastesRoute, async c => {
 const createPasteRoute = createRoute({
 	method: 'post',
 	path: '/',
-	request: {
-		body: {
-			required: true,
-			content: {
-				'application/json': {
-					schema: pasteNewSchema,
-				},
-			},
-		},
-	},
+	request: { body: body(pasteNewSchema) },
 	responses: { 200: apiSuccess(pasteBaseSchema) },
 })
 
@@ -57,11 +47,7 @@ app.openapi(createPasteRoute, async c => {
 const getPasteRoute = createRoute({
 	method: 'get',
 	path: '/:id',
-	request: {
-		params: z.object({
-			id: idSchema,
-		}),
-	},
+	request: { params: z.object({ id: idSchema }) },
 	responses: { 200: apiSuccess(pasteBaseSchema) },
 })
 
@@ -77,17 +63,8 @@ const updatePasteRoute = createRoute({
 	method: 'patch',
 	path: '/:id',
 	request: {
-		params: z.object({
-			id: idSchema,
-		}),
-		body: {
-			required: true,
-			content: {
-				'application/json': {
-					schema: pasteUpdateSchema,
-				},
-			},
-		},
+		params: z.object({ id: idSchema }),
+		body: body(pasteUpdateSchema),
 	},
 	responses: { 200: apiSuccess(pasteBaseSchema) },
 })
@@ -104,11 +81,7 @@ app.openapi(updatePasteRoute, async c => {
 const deletePasteRoute = createRoute({
 	method: 'delete',
 	path: '/:id',
-	request: {
-		params: z.object({
-			id: idSchema,
-		}),
-	},
+	request: { params: z.object({ id: idSchema }) },
 	responses: { 204: { description: 'Success' } },
 })
 

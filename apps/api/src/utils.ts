@@ -19,3 +19,12 @@ export const apiSuccess = <T extends ZodType>(
 		},
 	},
 })
+
+export const body = <T extends ZodType>(schema: T) => ({
+	required: true,
+	content: {
+		'application/json': {
+			schema,
+		},
+	},
+})
