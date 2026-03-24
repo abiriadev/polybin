@@ -1,5 +1,5 @@
-import type { PasteBase, PasteNew, PasteUpdate } from './schemas'
-import type { UserBase, UserNew, UserNewWithHash } from './user.schema'
+import type { PasteBase, PasteNew, PasteUpdate } from './post.schema'
+import type { UserBase, UserNewWithHash } from './user.schema'
 
 export class Db {
 	#driver: D1Database
