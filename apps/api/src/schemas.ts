@@ -15,3 +15,10 @@ export const apiSuccessResponseSchemaFactory = <T extends ZodType>(schema: T) =>
 		message: z.string(),
 		data: schema,
 	})
+
+export const idSchema = z.string().openapi({
+	param: {
+		name: 'id',
+		in: 'path',
+	},
+})

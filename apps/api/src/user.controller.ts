@@ -8,13 +8,7 @@ import {
 import type { InjectedEnv } from './env'
 import { Hashed } from './hash'
 import { apiSuccess, body, r } from './utils'
-
-const idSchema = z.string().openapi({
-	param: {
-		name: 'id',
-		in: 'path',
-	},
-})
+import { idSchema } from './schemas'
 
 export const app = new OpenAPIHono<InjectedEnv>()
 
