@@ -16,6 +16,14 @@ export const apiSuccessResponseSchemaFactory = <T extends ZodType>(schema: T) =>
 		data: schema,
 	})
 
+export const apiFailureResponseSchemaFactory = <T extends string>(
+	message?: T,
+) =>
+	z.object({
+		ok: false,
+		message: message ? z.literal(message) : z.string(),
+	})
+
 export const idSchema = z.string().openapi({
 	param: {
 		name: 'id',

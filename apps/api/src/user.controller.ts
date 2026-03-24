@@ -7,7 +7,7 @@ import {
 } from './user.schema'
 import type { InjectedEnv } from './env'
 import { Hashed } from './hash'
-import { apiSuccess, body, r } from './utils'
+import { apiFailure, apiSuccess, body, r } from './utils'
 import { idSchema } from './schemas'
 
 export const app = new OpenAPIHono<InjectedEnv>()
@@ -68,8 +68,8 @@ const updateUserPasswordRoute = createRoute({
 		body: body(userPasswordUpdateSchema),
 	},
 	responses: {
-		200: { description: 'Success' },
-		403: { description: 'Forbidden' },
+		200: apiSuccess(z.null(), 'Password updated successfully'),
+		403: apiFailure('Incorrect password'),
 	},
 })
 
@@ -84,7 +84,8 @@ app.openapi(updateUserPasswordRoute, async c => {
 
 	const hashed = Hashed.deserialize(hash)
 
-	if (!(await hashed.verify(body.oldPassword))) return c.body(null, 403)
+	if (!(await hashed.verify(body.oldPassword)))
+		return c.json(r(null, 'Incorrect password'), 403)
 
 	// set new password
 	const newHashed = await Hashed.computeHash(body.newPassword)
@@ -93,7 +94,7 @@ app.openapi(updateUserPasswordRoute, async c => {
 
 	const result = await db.updateUserHash(params.id, newHash)
 
-	return c.body(null, 200)
+	return c.json(r(null, 'Password updated successfully'), 200)
 })
 
 const deleteUserRoute = createRoute({

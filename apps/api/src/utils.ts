@@ -1,5 +1,8 @@
 import type { ZodType } from 'zod/v4'
-import { apiSuccessResponseSchemaFactory } from './schemas'
+import {
+	apiFailureResponseSchemaFactory,
+	apiSuccessResponseSchemaFactory,
+} from './schemas'
 
 export const r = <T>(data: T, message?: string) =>
 	({
@@ -16,6 +19,15 @@ export const apiSuccess = <T extends ZodType>(
 	content: {
 		'application/json': {
 			schema: apiSuccessResponseSchemaFactory(schema),
+		},
+	},
+})
+
+export const apiFailure = (message?: string, description?: string) => ({
+	description: description ?? 'Failure',
+	content: {
+		'application/json': {
+			schema: apiFailureResponseSchemaFactory(message),
 		},
 	},
 })
