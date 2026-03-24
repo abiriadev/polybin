@@ -18,7 +18,7 @@ const listPastesRoute = createRoute({
 })
 
 app.openapi(listPastesRoute, async c => {
-	const result = await c.get('db').listPastes()
+	const result = await c.var.db.listPastes()
 
 	return c.json(r(result), 200)
 })
@@ -33,7 +33,7 @@ const createPasteRoute = createRoute({
 app.openapi(createPasteRoute, async c => {
 	const body: PasteNew = c.req.valid('json')
 
-	const result = await c.get('db').createPaste(body)
+	const result = await c.var.db.createPaste(body)
 
 	return c.json(r(result), 200)
 })
@@ -48,7 +48,7 @@ const getPasteRoute = createRoute({
 app.openapi(getPasteRoute, async c => {
 	const params = c.req.valid('param')
 
-	const result = await c.get('db').getPaste(params.id)
+	const result = await c.var.db.getPaste(params.id)
 
 	return c.json(r(result), 200)
 })
@@ -67,7 +67,7 @@ app.openapi(updatePasteRoute, async c => {
 	const params = c.req.valid('param')
 	const body = c.req.valid('json')
 
-	const result = await c.get('db').updatePaste(params.id, body)
+	const result = await c.var.db.updatePaste(params.id, body)
 
 	return c.json(r(result), 200)
 })
@@ -82,7 +82,7 @@ const deletePasteRoute = createRoute({
 app.openapi(deletePasteRoute, async c => {
 	const params = c.req.valid('param')
 
-	const result = await c.get('db').deletePaste(params.id)
+	const result = await c.var.db.deletePaste(params.id)
 
 	return c.body(null, 204)
 })

@@ -19,7 +19,7 @@ const listUserRoute = createRoute({
 })
 
 app.openapi(listUserRoute, async c => {
-	const result = await c.get('db').listUsers()
+	const result = await c.var.db.listUsers()
 
 	return c.json(r(result), 200)
 })
@@ -37,7 +37,7 @@ app.openapi(createUserRoute, async c => {
 	const hashed = await Hashed.computeHash(password)
 	const hash = hashed.serialize()
 
-	const result = await c.get('db').createUser({
+	const result = await c.var.db.createUser({
 		...userNew,
 		hash,
 	})
@@ -55,7 +55,7 @@ const getUserRoute = createRoute({
 app.openapi(getUserRoute, async c => {
 	const params = c.req.valid('param')
 
-	const result = await c.get('db').getUser(params.id)
+	const result = await c.var.db.getUser(params.id)
 
 	return c.json(r(result), 200)
 })
@@ -77,7 +77,7 @@ app.openapi(updateUserPasswordRoute, async c => {
 	const params = c.req.valid('param')
 	const body = c.req.valid('json')
 
-	const db = c.get('db')
+	const { db } = c.var
 
 	// check previous hash first
 	const hash = await db.getUserHash(params.id)
@@ -106,7 +106,7 @@ const deleteUserRoute = createRoute({
 app.openapi(deleteUserRoute, async c => {
 	const params = c.req.valid('param')
 
-	await c.get('db').deleteUser(params.id)
+	await c.var.db.deleteUser(params.id)
 
 	return c.body(null, 204)
 })
