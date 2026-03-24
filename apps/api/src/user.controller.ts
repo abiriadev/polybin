@@ -14,7 +14,7 @@ export const app = new OpenAPIHono<InjectedEnv>()
 
 const listUserRoute = createRoute({
 	method: 'get',
-	path: '/users',
+	path: '/',
 	responses: {
 		200: {
 			description: 'Success',
