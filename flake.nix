@@ -22,6 +22,7 @@
             nodejs
             pnpm
             wrangler
+            litecli
           ];
         };
       }
