@@ -13,12 +13,13 @@ export const r = <T>(data: T, message?: string) =>
 
 export const apiSuccess = <T extends ZodType>(
 	schema: T,
+	message?: string,
 	description?: string,
 ) => ({
 	description: description ?? 'Success',
 	content: {
 		'application/json': {
-			schema: apiSuccessResponseSchemaFactory(schema),
+			schema: apiSuccessResponseSchemaFactory(schema, message),
 		},
 	},
 })

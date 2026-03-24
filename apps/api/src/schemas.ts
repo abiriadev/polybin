@@ -9,10 +9,16 @@ export const isoDatetimeToDate = z.codec(z.iso.datetime(), z.date(), {
 	encode: date => date.toISOString(),
 })
 
-export const apiSuccessResponseSchemaFactory = <T extends ZodType>(schema: T) =>
+export const apiSuccessResponseSchemaFactory = <
+	T extends ZodType,
+	M extends string,
+>(
+	schema: T,
+	message?: M,
+) =>
 	z.object({
 		ok: true,
-		message: z.string(),
+		message: message ? z.literal(message) : z.string(),
 		data: schema,
 	})
 
