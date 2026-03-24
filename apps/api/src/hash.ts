@@ -203,7 +203,7 @@ export class Hashed {
 	 *
 	 * @param serialized The PHC-compatible serialized hash string.
 	 */
-	static async deserialize(serialized: string) {
+	static deserialize(serialized: string) {
 		const [hash, salt, options] = this.#phcDeserialize(serialized)
 
 		return new Hashed(hash, salt, options)
