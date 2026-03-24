@@ -1,4 +1,4 @@
-import type { PasteBase, PasteNew, PasteUpdate } from './post.schema'
+import type { PasteBase, PasteNew, PasteUpdate } from './paste.schema'
 import type { UserBase, UserNewWithHash } from './user.schema'
 
 export class Db {

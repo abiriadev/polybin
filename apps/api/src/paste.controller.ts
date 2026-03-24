@@ -4,7 +4,7 @@ import {
 	type PasteNew,
 	pasteNewSchema,
 	pasteUpdateSchema,
-} from './schemas'
+} from './paste.schema'
 import type { InjectedEnv } from './env'
 
 const idSchema = z.string().openapi({
