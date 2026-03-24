@@ -1,5 +1,10 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
-import { userBaseSchema, userNewSchem, type UserNew } from './user.schema'
+import {
+	userBaseSchema,
+	userNewSchem,
+	userPasswordUpdateSchema,
+	type UserNew,
+} from './user.schema'
 import type { InjectedEnv } from './env'
 import { Hashed } from './hash'
 
@@ -98,6 +103,51 @@ app.openapi(getUserRoute, async c => {
 	const result = await c.get('db').getUser(params.id)
 
 	return c.json(result, 200)
+})
+
+const updateUserPasswordRoute = createRoute({
+	method: 'patch',
+	path: '/:id/password',
+	request: {
+		params: z.object({
+			id: idSchema,
+		}),
+		body: {
+			required: true,
+			content: {
+				'application/json': {
+					schema: userPasswordUpdateSchema,
+				},
+			},
+		},
+	},
+	responses: {
+		200: { description: 'Success' },
+		403: { description: 'Forbidden' },
+	},
+})
+
+app.openapi(updateUserPasswordRoute, async c => {
+	const params = c.req.valid('param')
+	const body = c.req.valid('json')
+
+	const db = c.get('db')
+
+	// check previous hash first
+	const hash = await db.getUserHash(params.id)
+
+	const hashed = Hashed.deserialize(hash)
+
+	if (!(await hashed.verify(body.oldPassword))) return c.body(null, 403)
+
+	// set new password
+	const newHashed = await Hashed.computeHash(body.newPassword)
+
+	const newHash = newHashed.serialize()
+
+	const result = await db.updateUserHash(params.id, newHash)
+
+	return c.body(null, 200)
 })
 
 const deleteUserRoute = createRoute({
