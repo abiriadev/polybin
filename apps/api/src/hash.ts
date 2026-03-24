@@ -120,8 +120,10 @@ export class Hashed {
 		salt: ArrayBuffer,
 		{ iterations, length, hashAlgorithm }: HashOptions,
 	) {
+		const alg = hashAlgorithm === 'SHA-256' ? 'sha256' : 'sha512'
+
 		const phc = {
-			id: `pbkdf2-${hashAlgorithm.toLowerCase()}`,
+			id: `pbkdf2-${alg}`,
 			hash,
 			salt,
 			params: {
