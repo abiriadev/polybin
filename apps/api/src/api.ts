@@ -2,12 +2,14 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import type { InjectedEnv } from './env'
 import { app as pasteApp } from './paste.controller'
 import { app as userApp } from './user.controller'
+import { app as authApp } from './auth.controller'
 import { HTTPException } from 'hono/http-exception'
 
 export const app = new OpenAPIHono<InjectedEnv>()
 
 app.route('/pastes', pasteApp)
 app.route('/users', userApp)
+app.route('/auth', authApp)
 
 app.onError((err, c) => {
 	if (err instanceof HTTPException) {

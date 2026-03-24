@@ -9,5 +9,7 @@ export interface InjectedEnv extends Env {
 	}
 	Bindings: {
 		db: D1Database
+		JWT_SECRET: string
+		WORKER_ENV: string
 	}
 }
