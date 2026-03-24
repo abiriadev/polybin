@@ -177,6 +177,28 @@ export class Db {
 		}
 	}
 
+	async getUserHash(id: string): Promise<string> {
+		const result = await this.#driver
+			.prepare(`select hash from users where id = ?`)
+			.bind(id)
+			.first<{
+				hash: string
+			}>()
+
+		if (!result) throw new Error('Failed to get user hash')
+
+		return result.hash
+	}
+
+	async updateUserHash(id: string, hash: string): Promise<void> {
+		const result = await this.#driver
+			.prepare(`update users set hash = ? where id = ?`)
+			.bind(hash, id)
+			.run()
+
+		if (!result.success) throw new Error('Failed to update user hash')
+	}
+
 	async deleteUser(id: string): Promise<UserBase> {
 		const result = await this.#driver
 			.prepare(`delete from users where id = ? returning *`)
