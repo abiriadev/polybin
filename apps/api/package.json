@@ -5,6 +5,7 @@
 	"main": "src/index.ts",
 	"scripts": {
 		"start:dev": "wrangler dev",
+		"dev": "wrangler dev",
 		"test": "vitest run"
 	},
 	"devDependencies": {

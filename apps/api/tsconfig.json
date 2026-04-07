@@ -1,7 +1,8 @@
 {
 	"compilerOptions": {
-		"target": "es2024",
+		"target": "ESNext",
 		"module": "preserve",
+		"lib": ["ESNext"],
 		"paths": {
 			"@/*": ["./src/*"]
 		},
