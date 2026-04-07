@@ -12,11 +12,17 @@ app.route('/users', userApp)
 app.route('/auth', authApp)
 
 app.onError((err, c) => {
-	if (err instanceof HTTPException) {
-		return c.json({ ok: false, message: err.message }, err.status)
+	const res: { ok: boolean; message: string; cause?: unknown } = {
+		ok: false,
+		message: err.message,
 	}
 
-	return c.json({ ok: false, message: err.message }, 500)
+	console.log(err)
+	if (c.env.WORKER_ENV === 'development') res.cause = err.cause
+
+	if (err instanceof HTTPException) return c.json(res, err.status)
+
+	return c.json(res, 500)
 })
 
 // https://github.com/honojs/hono/issues/3465
