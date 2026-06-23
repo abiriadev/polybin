@@ -45,7 +45,9 @@ class Api {
 			return null as unknown as T
 		}
 
-		return response.json()
+		// the API wraps every payload as `{ ok, message, data }`
+		const json = await response.json()
+		return json.data as T
 	}
 
 	private parsePaste(paste: any): Paste {
