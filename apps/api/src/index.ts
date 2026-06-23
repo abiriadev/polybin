@@ -6,6 +6,7 @@ import { cors } from 'hono/cors'
 import { app as apiApp } from './api'
 import { Db } from './db'
 import type { InjectedEnv } from './env'
+import { builderFactory } from './builder'
 
 const app = new OpenAPIHono<InjectedEnv>()
 export default app
@@ -14,7 +15,7 @@ app.use('*', logger())
 app.use('*', cors())
 
 app.use('*', async (c, next) => {
-	const db = new Db(c.env.db)
+	const db = new Db(builderFactory(c.env.db))
 	await db.initSchema()
 
 	c.set('db', db)

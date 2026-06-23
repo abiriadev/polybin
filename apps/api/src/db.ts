@@ -1,42 +1,44 @@
+import { sql } from 'kysely'
+import type { Builder } from './builder'
 import type { PasteBase, PasteNew, PasteUpdate } from './paste.schema'
 import type { UserBase, UserNewWithHash } from './user.schema'
 
 export class Db {
-	#driver: D1Database
+	#builder: Builder
 
-	constructor(driver: D1Database) {
-		this.#driver = driver
+	constructor(builder: Builder) {
+		this.#builder = builder
 	}
 
 	async initSchema() {
-		await this.#driver
-			.prepare(
-				`create table if not exists pastes (
-					id integer primary key,
-					content text,
-					created_at text default current_timestamp
-				);
-
-				create table if not exists users (
-					id integer primary key,
-					name text unique,
-					hash text,
-					created_at text default current_timestamp
-				);
-				`,
+		await this.#builder.schema
+			.createTable('pastes')
+			.ifNotExists()
+			.addColumn('id', 'integer', col => col.primaryKey())
+			.addColumn('content', 'text')
+			.addColumn('created_at', 'text', col =>
+				col.defaultTo(sql`current_timestamp`),
 			)
-			.run()
+			.execute()
+
+		await this.#builder.schema
+			.createTable('users')
+			.ifNotExists()
+			.addColumn('id', 'integer', col => col.primaryKey())
+			.addColumn('name', 'text', col => col.unique())
+			.addColumn('hash', 'text')
+			.addColumn('created_at', 'text', col =>
+				col.defaultTo(sql`current_timestamp`),
+			)
+			.execute()
 	}
 
 	async createPaste(pasteNew: PasteNew): Promise<PasteBase> {
-		const result = await this.#driver
-			.prepare(`insert into pastes (content) values (?) returning *`)
-			.bind(pasteNew.content)
-			.first<{
-				id: number
-				content: string
-				created_at: string
-			}>()
+		const result = await this.#builder
+			.insertInto('pastes')
+			.values({ content: pasteNew.content })
+			.returningAll()
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to create paste')
 
@@ -48,15 +50,12 @@ export class Db {
 	}
 
 	async listPastes(): Promise<PasteBase[]> {
-		const result = await this.#driver.prepare(`select * from pastes`).run<{
-			id: number
-			content: string
-			created_at: string
-		}>()
+		const result = await this.#builder
+			.selectFrom('pastes')
+			.selectAll()
+			.execute()
 
-		if (!result.success) throw new Error('Failed to list pastes')
-
-		return result.results.map(paste => ({
+		return result.map(paste => ({
 			id: paste.id.toString(),
 			content: paste.content,
 			createdAt: new Date(paste.created_at),
@@ -64,14 +63,11 @@ export class Db {
 	}
 
 	async getPaste(id: string): Promise<PasteBase> {
-		const result = await this.#driver
-			.prepare(`select * from pastes where id = ?`)
-			.bind(id)
-			.first<{
-				id: number
-				content: string
-				created_at: string
-			}>()
+		const result = await this.#builder
+			.selectFrom('pastes')
+			.selectAll()
+			.where('id', '=', Number(id))
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to get paste')
 
@@ -86,14 +82,12 @@ export class Db {
 		id: string,
 		pasteUpdate: PasteUpdate,
 	): Promise<PasteBase> {
-		const result = await this.#driver
-			.prepare(`update pastes set content = ? where id = ? returning *`)
-			.bind(pasteUpdate.content)
-			.first<{
-				id: number
-				content: string
-				created_at: string
-			}>()
+		const result = await this.#builder
+			.updateTable('pastes')
+			.set({ content: pasteUpdate.content })
+			.where('id', '=', Number(id))
+			.returningAll()
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to update paste')
 
@@ -105,14 +99,11 @@ export class Db {
 	}
 
 	async deletePaste(id: string): Promise<PasteBase> {
-		const result = await this.#driver
-			.prepare(`delete from pastes where id = ? returning *`)
-			.bind(id)
-			.first<{
-				id: number
-				content: string
-				created_at: string
-			}>()
+		const result = await this.#builder
+			.deleteFrom('pastes')
+			.where('id', '=', Number(id))
+			.returningAll()
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to delete paste')
 
@@ -124,14 +115,11 @@ export class Db {
 	}
 
 	async createUser(userNew: UserNewWithHash): Promise<UserBase> {
-		const result = await this.#driver
-			.prepare(`insert into users (name, hash) values (?, ?) returning *`)
-			.bind(userNew.name, userNew.hash)
-			.first<{
-				id: number
-				name: string
-				created_at: string
-			}>()
+		const result = await this.#builder
+			.insertInto('users')
+			.values({ name: userNew.name, hash: userNew.hash })
+			.returningAll()
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to create user')
 
@@ -143,15 +131,12 @@ export class Db {
 	}
 
 	async listUsers(): Promise<UserBase[]> {
-		const result = await this.#driver.prepare(`select * from users`).run<{
-			id: number
-			name: string
-			created_at: string
-		}>()
+		const result = await this.#builder
+			.selectFrom('users')
+			.selectAll()
+			.execute()
 
-		if (!result.success) throw new Error('Failed to list users')
-
-		return result.results.map(user => ({
+		return result.map(user => ({
 			id: user.id.toString(),
 			name: user.name,
 			createdAt: new Date(user.created_at),
@@ -159,14 +144,11 @@ export class Db {
 	}
 
 	async getUser(id: string): Promise<UserBase> {
-		const result = await this.#driver
-			.prepare(`select * from users where id = ?`)
-			.bind(id)
-			.first<{
-				id: number
-				name: string
-				created_at: string
-			}>()
+		const result = await this.#builder
+			.selectFrom('users')
+			.selectAll()
+			.where('id', '=', Number(id))
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to get user')
 
@@ -178,14 +160,11 @@ export class Db {
 	}
 
 	async getUserByName(name: string): Promise<UserBase> {
-		const result = await this.#driver
-			.prepare(`select * from users where name = ?`)
-			.bind(name)
-			.first<{
-				id: number
-				name: string
-				created_at: string
-			}>()
+		const result = await this.#builder
+			.selectFrom('users')
+			.selectAll()
+			.where('name', '=', name)
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to get user by name')
 
@@ -197,12 +176,11 @@ export class Db {
 	}
 
 	async getUserHash(id: string): Promise<string> {
-		const result = await this.#driver
-			.prepare(`select hash from users where id = ?`)
-			.bind(id)
-			.first<{
-				hash: string
-			}>()
+		const result = await this.#builder
+			.selectFrom('users')
+			.select('hash')
+			.where('id', '=', Number(id))
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to get user hash')
 
@@ -210,23 +188,19 @@ export class Db {
 	}
 
 	async updateUserHash(id: string, hash: string): Promise<void> {
-		const result = await this.#driver
-			.prepare(`update users set hash = ? where id = ?`)
-			.bind(hash, id)
-			.run()
-
-		if (!result.success) throw new Error('Failed to update user hash')
+		await this.#builder
+			.updateTable('users')
+			.set({ hash })
+			.where('id', '=', Number(id))
+			.execute()
 	}
 
 	async deleteUser(id: string): Promise<UserBase> {
-		const result = await this.#driver
-			.prepare(`delete from users where id = ? returning *`)
-			.bind(id)
-			.first<{
-				id: number
-				name: string
-				created_at: string
-			}>()
+		const result = await this.#builder
+			.deleteFrom('users')
+			.where('id', '=', Number(id))
+			.returningAll()
+			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to delete user')
 

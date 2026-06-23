@@ -1,27 +1,69 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import Database from 'better-sqlite3'
+import { beforeEach, describe, expect, it } from 'vitest'
 import app from './index'
 
-// Mock D1Database
-const mockD1 = {
-	prepare: vi.fn().mockReturnThis(),
-	bind: vi.fn().mockReturnThis(),
-	first: vi.fn(),
-	run: vi.fn(),
-	all: vi.fn(),
-	exec: vi.fn(),
-	batch: vi.fn(),
-	dump: vi.fn(),
-} as any
+// Minimal D1Database adapter backed by an in-memory better-sqlite3 instance.
+// kysely-d1 only ever calls `prepare(sql).bind(...params).all()`, expecting a
+// result of the shape `{ results, success, meta: { changes, last_row_id } }`.
+const createD1 = (): D1Database => {
+	const sqlite = new Database(':memory:')
+
+	const prepare = (sql: string) => {
+		const stmt = sqlite.prepare(sql)
+		let params: unknown[] = []
+
+		const statement = {
+			bind(...values: unknown[]) {
+				params = values
+				return statement
+			},
+			async all() {
+				if (stmt.reader) {
+					return {
+						success: true,
+						results: stmt.all(...params),
+						meta: { changes: 0, last_row_id: 0 },
+					}
+				}
+
+				const info = stmt.run(...params)
+				return {
+					success: true,
+					results: [],
+					meta: {
+						changes: info.changes,
+						last_row_id: Number(info.lastInsertRowid),
+					},
+				}
+			},
+		}
+
+		return statement
+	}
+
+	return { prepare } as unknown as D1Database
+}
+
+const createPaste = (db: D1Database, content: string) =>
+	app.request(
+		'/api/pastes',
+		{
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ content }),
+		},
+		{ db },
+	)
 
 describe('Polybin API', () => {
+	let db: D1Database
+
 	beforeEach(() => {
-		vi.clearAllMocks()
-		mockD1.prepare.mockReturnThis()
-		mockD1.bind.mockReturnThis()
+		db = createD1()
 	})
 
 	it('should return version on root', async () => {
-		const res = await app.request('/', {}, { db: mockD1 })
+		const res = await app.request('/', {}, { db })
 		expect(res.status).toBe(200)
 		const body = (await res.json()) as any
 		expect(body).toHaveProperty('version')
@@ -29,114 +71,64 @@ describe('Polybin API', () => {
 
 	describe('Pastes API', () => {
 		it('should create a paste', async () => {
-			const mockPaste = {
-				id: 1,
-				content: 'Hello World',
-				created_at: new Date().toISOString(),
-			}
-			mockD1.first.mockResolvedValue(mockPaste)
-			mockD1.run.mockResolvedValue({ success: true })
-
-			const res = await app.request(
-				'/api/pastes',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ content: 'Hello World' }),
-				},
-				{ db: mockD1 },
-			)
+			const res = await createPaste(db, 'Hello World')
 
 			expect(res.status).toBe(200)
 			const body = (await res.json()) as any
-			expect(body.content).toBe('Hello World')
-			expect(body.id).toBe('1')
+			expect(body.data.content).toBe('Hello World')
+			expect(body.data.id).toBe('1')
 		})
 
 		it('should list pastes', async () => {
-			const mockPastes = [
-				{
-					id: 1,
-					content: 'Paste 1',
-					created_at: new Date().toISOString(),
-				},
-				{
-					id: 2,
-					content: 'Paste 2',
-					created_at: new Date().toISOString(),
-				},
-			]
-			mockD1.run.mockResolvedValue({
-				success: true,
-				results: mockPastes,
-			})
+			await createPaste(db, 'Paste 1')
+			await createPaste(db, 'Paste 2')
 
-			const res = await app.request('/api/pastes', {}, { db: mockD1 })
+			const res = await app.request('/api/pastes', {}, { db })
 
 			expect(res.status).toBe(200)
 			const body = (await res.json()) as any
-			expect(Array.isArray(body)).toBe(true)
-			expect(body.length).toBe(2)
-			expect(body[0].content).toBe('Paste 1')
+			expect(Array.isArray(body.data)).toBe(true)
+			expect(body.data.length).toBe(2)
+			expect(body.data[0].content).toBe('Paste 1')
+			expect(body.data[1].content).toBe('Paste 2')
 		})
 
 		it('should get a paste by id', async () => {
-			const mockPaste = {
-				id: 1,
-				content: 'Hello World',
-				created_at: new Date().toISOString(),
-			}
-			mockD1.first.mockResolvedValue(mockPaste)
+			await createPaste(db, 'Hello World')
 
-			const res = await app.request('/api/pastes/1', {}, { db: mockD1 })
+			const res = await app.request('/api/pastes/1', {}, { db })
 
 			expect(res.status).toBe(200)
 			const body = (await res.json()) as any
-			expect(body.id).toBe('1')
-			expect(body.content).toBe('Hello World')
+			expect(body.data.id).toBe('1')
+			expect(body.data.content).toBe('Hello World')
 		})
 
 		it('should update a paste', async () => {
-			const mockPaste = {
-				id: 1,
-				content: 'Updated Content',
-				created_at: new Date().toISOString(),
-			}
-			mockD1.first.mockResolvedValue(mockPaste)
+			await createPaste(db, 'Original Content')
 
 			const res = await app.request(
 				'/api/pastes/1',
 				{
 					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-					},
+					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ content: 'Updated Content' }),
 				},
-				{ db: mockD1 },
+				{ db },
 			)
 
 			expect(res.status).toBe(200)
 			const body = (await res.json()) as any
-			expect(body.content).toBe('Updated Content')
+			expect(body.data.content).toBe('Updated Content')
 		})
 
 		it('should delete a paste', async () => {
-			const mockPaste = {
-				id: 1,
-				content: 'To be deleted',
-				created_at: new Date().toISOString(),
-			}
-			mockD1.first.mockResolvedValue(mockPaste)
+			await createPaste(db, 'To be deleted')
 
 			const res = await app.request(
 				'/api/pastes/1',
-				{
-					method: 'DELETE',
-				},
-				{ db: mockD1 },
+				{ method: 'DELETE' },
+				{ db },
 			)
 
 			expect(res.status).toBe(204)
