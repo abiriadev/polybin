@@ -53,6 +53,26 @@ app.openapi(getPasteRoute, async c => {
 	return c.json(r(result), 200)
 })
 
+const rawPasteRoute = createRoute({
+	method: 'get',
+	path: '/:id/raw',
+	request: { params: z.object({ id: idSchema }) },
+	responses: {
+		200: {
+			description: 'Raw paste content',
+			content: { 'text/plain': { schema: z.string() } },
+		},
+	},
+})
+
+app.openapi(rawPasteRoute, async c => {
+	const params = c.req.valid('param')
+
+	const result = await c.var.db.getPaste(params.id)
+
+	return c.text(result.content, 200)
+})
+
 const updatePasteRoute = createRoute({
 	method: 'patch',
 	path: '/:id',
