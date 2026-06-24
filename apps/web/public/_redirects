@@ -1,0 +1,5 @@
+# Cloudflare Pages SPA rewrite for runtime-dynamic paste ids.
+# Static export only builds /pastes/placeholder; serve that shell for any id
+# (status 200 = rewrite, keeps the browser URL). The client reads the real id.
+# See docs/frontend-rendering-and-cf-deployment.md.
+/pastes/*  /pastes/placeholder  200
