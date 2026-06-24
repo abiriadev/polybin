@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { api, Paste } from '../../lib/api'
+import MarkdownEditor from '../../components/markdown-editor'
 import Markdown from 'react-markdown'
-import { Calendar, FileText, ChevronLeft } from 'lucide-react'
+import { Calendar, FileText, ChevronLeft, Pencil, Save, X } from 'lucide-react'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -13,6 +14,10 @@ export default function PasteView() {
 	const [paste, setPaste] = useState<Paste | null>(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+
+	const [isEditing, setIsEditing] = useState(false)
+	const [draft, setDraft] = useState('')
+	const [isSaving, setIsSaving] = useState(false)
 
 	// Under `output: export` the page is the prerendered `placeholder` shell
 	// served for every id via the CF Pages rewrite, so `useParams()` yields
@@ -33,6 +38,29 @@ export default function PasteView() {
 			})
 			.finally(() => setLoading(false))
 	}, [])
+
+	const startEditing = () => {
+		if (!paste) return
+		setDraft(paste.content)
+		setIsEditing(true)
+	}
+
+	const cancelEditing = () => setIsEditing(false)
+
+	const saveEditing = async () => {
+		if (!paste) return
+		setIsSaving(true)
+		try {
+			const updated = await api.updatePaste(paste.id, { content: draft })
+			setPaste(updated)
+			setIsEditing(false)
+		} catch (err) {
+			console.error('Failed to update paste:', err)
+			alert('Failed to save changes. Please try again.')
+		} finally {
+			setIsSaving(false)
+		}
+	}
 
 	if (loading) {
 		return (
@@ -79,6 +107,37 @@ export default function PasteView() {
 							<ChevronLeft size={16} />
 							New Paste
 						</a>
+						{isEditing ? (
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={cancelEditing}
+									disabled={isSaving}
+									className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+								>
+									<X size={16} />
+									Cancel
+								</button>
+								<button
+									type="button"
+									onClick={saveEditing}
+									disabled={isSaving}
+									className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:bg-blue-400"
+								>
+									<Save size={16} />
+									{isSaving ? 'Saving...' : 'Save'}
+								</button>
+							</div>
+						) : (
+							<button
+								type="button"
+								onClick={startEditing}
+								className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
+							>
+								<Pencil size={16} />
+								Edit
+							</button>
+						)}
 					</div>
 					<div className="flex flex-col gap-2">
 						<h1 className="text-2xl font-bold flex items-center gap-2">
@@ -91,14 +150,23 @@ export default function PasteView() {
 						</div>
 					</div>
 				</div>
-				<article className="prose prose-zinc dark:prose-invert max-w-none">
-					<Markdown
-						remarkPlugins={[remarkGfm, remarkMath]}
-						rehypePlugins={[rehypeKatex]}
-					>
-						{paste.content}
-					</Markdown>
-				</article>
+				{isEditing ? (
+					<MarkdownEditor
+						value={draft}
+						onChange={setDraft}
+						editable={!isSaving}
+						autoFocus
+					/>
+				) : (
+					<article className="prose prose-zinc dark:prose-invert max-w-none">
+						<Markdown
+							remarkPlugins={[remarkGfm, remarkMath]}
+							rehypePlugins={[rehypeKatex]}
+						>
+							{paste.content}
+						</Markdown>
+					</article>
+				)}
 			</div>
 		</div>
 	)

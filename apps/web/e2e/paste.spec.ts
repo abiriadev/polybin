@@ -49,6 +49,31 @@ test.describe('Polybin pastes', () => {
 		).toBeVisible()
 	})
 
+	test('edit an existing paste', async ({ page, request }) => {
+		const paste = await seedPaste(request, `Original body ${Date.now()}`)
+		const updated = `Updated body ${Date.now()}`
+
+		await page.goto(`/pastes/${paste.id}`)
+
+		await page.getByRole('button', { name: 'Edit' }).click()
+
+		const editor = page.locator('.cm-content')
+		await editor.click()
+		await page.keyboard.press('ControlOrMeta+A')
+		await page.keyboard.press('Delete')
+		await page.keyboard.type(updated)
+
+		await page.getByRole('button', { name: 'Save' }).click()
+
+		// Back to the rendered view, showing the new content.
+		await expect(page.getByText(updated)).toBeVisible()
+		await expect(page.getByRole('button', { name: 'Edit' })).toBeVisible()
+
+		// Reload to confirm it was persisted.
+		await page.reload()
+		await expect(page.getByText(updated)).toBeVisible()
+	})
+
 	test('access the raw url of a paste', async ({ page, request }) => {
 		const content = `Raw content ${Date.now()}`
 		const paste = await seedPaste(request, content)
