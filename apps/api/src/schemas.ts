@@ -17,7 +17,7 @@ export const apiSuccessResponseSchemaFactory = <
 	message?: M,
 ) =>
 	z.object({
-		ok: true,
+		ok: z.literal(true),
 		message: message ? z.literal(message) : z.string(),
 		data: schema,
 	})
@@ -26,7 +26,7 @@ export const apiFailureResponseSchemaFactory = <T extends string>(
 	message?: T,
 ) =>
 	z.object({
-		ok: false,
+		ok: z.literal(false),
 		message: message ? z.literal(message) : z.string(),
 	})
 

@@ -11,6 +11,12 @@ export const r = <T>(data: T, message?: string) =>
 		data,
 	}) as const
 
+export const rFail = (message: string) =>
+	({
+		ok: false,
+		message,
+	}) as const
+
 export const apiSuccess = <T extends ZodType>(
 	schema: T,
 	message?: string,

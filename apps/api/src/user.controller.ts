@@ -7,7 +7,7 @@ import {
 } from './user.schema'
 import type { InjectedEnv } from './env'
 import { Hashed } from './hash'
-import { apiFailure, apiSuccess, body, r } from './utils'
+import { apiFailure, apiSuccess, body, r, rFail } from './utils'
 import { idSchema } from './schemas'
 import { verifyPassword } from './auth.service'
 
@@ -82,14 +82,14 @@ app.openapi(updateUserPasswordRoute, async c => {
 
 	// check previous hash first
 	if (!(await verifyPassword(db, params.id, body.oldPassword)))
-		return c.json(r(null, 'Incorrect password'), 403)
+		return c.json(rFail('Incorrect password'), 403)
 
 	// set new password
 	const newHashed = await Hashed.computeHash(body.newPassword)
 
 	const newHash = newHashed.serialize()
 
-	const result = await db.updateUserHash(params.id, newHash)
+	await db.updateUserHash(params.id, newHash)
 
 	return c.json(r(null, 'Password updated successfully'), 200)
 })
