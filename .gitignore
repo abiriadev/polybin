@@ -10,3 +10,4 @@ ignored
 dist
 *.log
 .wrangler
+docs
