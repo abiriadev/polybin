@@ -2,7 +2,7 @@ import { type Generated, Kysely } from 'kysely'
 import { D1Dialect } from 'kysely-d1'
 
 interface PasteTable {
-	id: Generated<number>
+	id: string
 	content: string
 	created_at: Generated<string>
 }

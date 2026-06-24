@@ -55,6 +55,14 @@ const createPaste = (db: D1Database, content: string) =>
 		{ db },
 	)
 
+const createPasteId = async (db: D1Database, content: string) => {
+	const res = await createPaste(db, content)
+	const body = (await res.json()) as any
+	return body.data.id as string
+}
+
+const PASTE_ID = /^[A-Za-z0-9]{6}$/
+
 describe('Polybin API', () => {
 	let db: D1Database
 
@@ -76,7 +84,7 @@ describe('Polybin API', () => {
 			expect(res.status).toBe(200)
 			const body = (await res.json()) as any
 			expect(body.data.content).toBe('Hello World')
-			expect(body.data.id).toBe('1')
+			expect(body.data.id).toMatch(PASTE_ID)
 		})
 
 		it('should list pastes', async () => {
@@ -94,21 +102,21 @@ describe('Polybin API', () => {
 		})
 
 		it('should get a paste by id', async () => {
-			await createPaste(db, 'Hello World')
+			const id = await createPasteId(db, 'Hello World')
 
-			const res = await app.request('/api/pastes/1', {}, { db })
+			const res = await app.request(`/api/pastes/${id}`, {}, { db })
 
 			expect(res.status).toBe(200)
 			const body = (await res.json()) as any
-			expect(body.data.id).toBe('1')
+			expect(body.data.id).toBe(id)
 			expect(body.data.content).toBe('Hello World')
 		})
 
 		it('should update a paste', async () => {
-			await createPaste(db, 'Original Content')
+			const id = await createPasteId(db, 'Original Content')
 
 			const res = await app.request(
-				'/api/pastes/1',
+				`/api/pastes/${id}`,
 				{
 					method: 'PATCH',
 					headers: { 'Content-Type': 'application/json' },
@@ -123,10 +131,10 @@ describe('Polybin API', () => {
 		})
 
 		it('should delete a paste', async () => {
-			await createPaste(db, 'To be deleted')
+			const id = await createPasteId(db, 'To be deleted')
 
 			const res = await app.request(
-				'/api/pastes/1',
+				`/api/pastes/${id}`,
 				{ method: 'DELETE' },
 				{ db },
 			)

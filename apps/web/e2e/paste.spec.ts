@@ -32,7 +32,7 @@ test.describe('Polybin pastes', () => {
 		await page.getByRole('button', { name: 'Paste' }).click()
 
 		// Should land on the new paste's permalink, not /pastes/undefined.
-		await expect(page).toHaveURL(/\/pastes\/\d+$/)
+		await expect(page).toHaveURL(/\/pastes\/[A-Za-z0-9]{6}$/)
 		await expect(page.getByText('Hello e2e', { exact: false })).toBeVisible()
 	})
 

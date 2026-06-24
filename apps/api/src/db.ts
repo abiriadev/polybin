@@ -1,7 +1,11 @@
 import { sql } from 'kysely'
 import type { Builder } from './builder'
+import { generatePasteId } from './id'
 import type { PasteBase, PasteNew, PasteUpdate } from './paste.schema'
 import type { UserBase, UserNewWithHash } from './user.schema'
+
+const isUniqueViolation = (err: unknown): boolean =>
+	err instanceof Error && /UNIQUE constraint failed/i.test(err.message)
 
 export class Db {
 	#builder: Builder
@@ -14,7 +18,7 @@ export class Db {
 		await this.#builder.schema
 			.createTable('pastes')
 			.ifNotExists()
-			.addColumn('id', 'integer', col => col.primaryKey())
+			.addColumn('id', 'text', col => col.primaryKey())
 			.addColumn('content', 'text')
 			.addColumn('created_at', 'text', col =>
 				col.defaultTo(sql`current_timestamp`),
@@ -34,19 +38,34 @@ export class Db {
 	}
 
 	async createPaste(pasteNew: PasteNew): Promise<PasteBase> {
-		const result = await this.#builder
-			.insertInto('pastes')
-			.values({ content: pasteNew.content })
-			.returningAll()
-			.executeTakeFirst()
+		const maxAttempts = 5
 
-		if (!result) throw new Error('Failed to create paste')
+		for (let attempt = 0; attempt < maxAttempts; attempt++) {
+			try {
+				const result = await this.#builder
+					.insertInto('pastes')
+					.values({
+						id: generatePasteId(),
+						content: pasteNew.content,
+					})
+					.returningAll()
+					.executeTakeFirst()
 
-		return {
-			id: result.id.toString(),
-			content: result.content,
-			createdAt: new Date(result.created_at),
+				if (!result) throw new Error('Failed to create paste')
+
+				return {
+					id: result.id,
+					content: result.content,
+					createdAt: new Date(result.created_at),
+				}
+			} catch (err) {
+				// Random id collided with an existing row; try a new one.
+				if (isUniqueViolation(err)) continue
+				throw err
+			}
 		}
+
+		throw new Error('Failed to create paste: id generation exhausted')
 	}
 
 	async listPastes(): Promise<PasteBase[]> {
@@ -56,7 +75,7 @@ export class Db {
 			.execute()
 
 		return result.map(paste => ({
-			id: paste.id.toString(),
+			id: paste.id,
 			content: paste.content,
 			createdAt: new Date(paste.created_at),
 		}))
@@ -66,13 +85,13 @@ export class Db {
 		const result = await this.#builder
 			.selectFrom('pastes')
 			.selectAll()
-			.where('id', '=', Number(id))
+			.where('id', '=', id)
 			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to get paste')
 
 		return {
-			id: result.id.toString(),
+			id: result.id,
 			content: result.content,
 			createdAt: new Date(result.created_at),
 		}
@@ -85,14 +104,14 @@ export class Db {
 		const result = await this.#builder
 			.updateTable('pastes')
 			.set({ content: pasteUpdate.content })
-			.where('id', '=', Number(id))
+			.where('id', '=', id)
 			.returningAll()
 			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to update paste')
 
 		return {
-			id: result.id.toString(),
+			id: result.id,
 			content: result.content,
 			createdAt: new Date(result.created_at),
 		}
@@ -101,14 +120,14 @@ export class Db {
 	async deletePaste(id: string): Promise<PasteBase> {
 		const result = await this.#builder
 			.deleteFrom('pastes')
-			.where('id', '=', Number(id))
+			.where('id', '=', id)
 			.returningAll()
 			.executeTakeFirst()
 
 		if (!result) throw new Error('Failed to delete paste')
 
 		return {
-			id: result.id.toString(),
+			id: result.id,
 			content: result.content,
 			createdAt: new Date(result.created_at),
 		}
