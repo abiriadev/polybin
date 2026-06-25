@@ -6,7 +6,8 @@
 	"scripts": {
 		"start:dev": "wrangler dev",
 		"dev": "wrangler dev",
-		"test": "vitest run"
+		"test": "vitest run",
+		"deploy": "wrangler deploy"
 	},
 	"devDependencies": {
 		"@hono/swagger-ui": "^0.6.1",
