@@ -1,7 +1,13 @@
 import { sql } from 'kysely'
 import type { Builder } from './builder'
 import { generatePasteId } from './id'
-import type { PasteBase, PasteNew, PasteUpdate } from './paste.schema'
+import type {
+	PasteBase,
+	PasteList,
+	PasteListQuery,
+	PasteNew,
+	PasteUpdate,
+} from './paste.schema'
 import type { UserBase, UserNewWithHash } from './user.schema'
 
 const isUniqueViolation = (err: unknown): boolean =>
@@ -68,17 +74,30 @@ export class Db {
 		throw new Error('Failed to create paste: id generation exhausted')
 	}
 
-	async listPastes(): Promise<PasteBase[]> {
-		const result = await this.#builder
+	async listPastes({ page, pageSize }: PasteListQuery): Promise<PasteList> {
+		const rows = await this.#builder
 			.selectFrom('pastes')
 			.selectAll()
+			.orderBy('created_at', 'desc')
+			.limit(pageSize)
+			.offset((page - 1) * pageSize)
 			.execute()
 
-		return result.map(paste => ({
-			id: paste.id,
-			content: paste.content,
-			createdAt: new Date(paste.created_at),
-		}))
+		const counted = await this.#builder
+			.selectFrom('pastes')
+			.select(eb => eb.fn.countAll().as('count'))
+			.executeTakeFirst()
+
+		return {
+			items: rows.map(paste => ({
+				id: paste.id,
+				content: paste.content,
+				createdAt: new Date(paste.created_at),
+			})),
+			total: Number(counted?.count ?? 0),
+			page,
+			pageSize,
+		}
 	}
 
 	async getPaste(id: string): Promise<PasteBase> {

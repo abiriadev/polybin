@@ -29,7 +29,15 @@ export default function Home() {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground font-sans p-4">
 			<main className="flex w-full max-w-4xl flex-col gap-6">
-				<h1 className="text-3xl font-bold">Polybin</h1>
+				<div className="flex items-center justify-between">
+					<h1 className="text-3xl font-bold">Polybin</h1>
+					<a
+						href="/pastes"
+						className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+					>
+						Browse all pastes →
+					</a>
+				</div>
 				<form onSubmit={handleSubmit} className="flex flex-col gap-4">
 					<MarkdownEditor
 						value={content}

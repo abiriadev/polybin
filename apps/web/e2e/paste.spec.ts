@@ -74,6 +74,29 @@ test.describe('Polybin pastes', () => {
 		await expect(page.getByText(updated)).toBeVisible()
 	})
 
+	test('list pastes with pagination', async ({ page, request }) => {
+		// Ensure at least two pastes exist so pageSize=1 yields multiple pages.
+		await seedPaste(request, `List A ${Date.now()}`)
+		await seedPaste(request, `List B ${Date.now()}`)
+
+		await page.goto('/pastes?pageSize=1')
+
+		await expect(page.getByTestId('paste-item')).toHaveCount(1)
+		await expect(page.getByText('Page 1 of')).toBeVisible()
+		await expect(
+			page.getByRole('button', { name: 'Previous' }),
+		).toBeDisabled()
+		await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled()
+
+		await page.getByRole('button', { name: 'Next' }).click()
+
+		await expect(page.getByText('Page 2 of')).toBeVisible()
+		await expect(
+			page.getByRole('button', { name: 'Previous' }),
+		).toBeEnabled()
+		await expect(page.getByTestId('paste-item')).toHaveCount(1)
+	})
+
 	test('access the raw url of a paste', async ({ page, request }) => {
 		const content = `Raw content ${Date.now()}`
 		const paste = await seedPaste(request, content)

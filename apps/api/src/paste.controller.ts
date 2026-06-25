@@ -1,6 +1,8 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import {
 	pasteBaseSchema,
+	pasteListQuerySchema,
+	pasteListSchema,
 	type PasteNew,
 	pasteNewSchema,
 	pasteUpdateSchema,
@@ -14,11 +16,14 @@ export const app = new OpenAPIHono<InjectedEnv>()
 const listPastesRoute = createRoute({
 	method: 'get',
 	path: '/',
-	responses: { 200: apiSuccess(pasteBaseSchema.array()) },
+	request: { query: pasteListQuerySchema },
+	responses: { 200: apiSuccess(pasteListSchema) },
 })
 
 app.openapi(listPastesRoute, async c => {
-	const result = await c.var.db.listPastes()
+	const query = c.req.valid('query')
+
+	const result = await c.var.db.listPastes(query)
 
 	return c.json(r(result), 200)
 })

@@ -95,10 +95,32 @@ describe('Polybin API', () => {
 
 			expect(res.status).toBe(200)
 			const body = (await res.json()) as any
-			expect(Array.isArray(body.data)).toBe(true)
-			expect(body.data.length).toBe(2)
-			expect(body.data[0].content).toBe('Paste 1')
-			expect(body.data[1].content).toBe('Paste 2')
+			expect(body.data.total).toBe(2)
+			expect(body.data.page).toBe(1)
+			expect(Array.isArray(body.data.items)).toBe(true)
+			expect(body.data.items.length).toBe(2)
+			const contents = body.data.items.map((p: any) => p.content)
+			expect(contents).toContain('Paste 1')
+			expect(contents).toContain('Paste 2')
+		})
+
+		it('should paginate pastes', async () => {
+			for (const content of ['a', 'b', 'c']) {
+				await createPaste(db, content)
+			}
+
+			const res = await app.request(
+				'/api/pastes?page=2&pageSize=2',
+				{},
+				{ db },
+			)
+
+			expect(res.status).toBe(200)
+			const body = (await res.json()) as any
+			expect(body.data.total).toBe(3)
+			expect(body.data.page).toBe(2)
+			expect(body.data.pageSize).toBe(2)
+			expect(body.data.items.length).toBe(1)
 		})
 
 		it('should get a paste by id', async () => {

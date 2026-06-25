@@ -12,6 +12,13 @@ export interface PasteUpdate {
 	content?: string
 }
 
+export interface PasteList {
+	items: Paste[]
+	total: number
+	page: number
+	pageSize: number
+}
+
 class Api {
 	private baseUrl: string
 
@@ -57,9 +64,14 @@ class Api {
 		}
 	}
 
-	async listPastes(): Promise<Paste[]> {
-		const response = await this.request<any[]>('/api/pastes')
-		return response.map(p => this.parsePaste(p))
+	async listPastes(page = 1, pageSize = 10): Promise<PasteList> {
+		const response = await this.request<any>(
+			`/api/pastes?page=${page}&pageSize=${pageSize}`,
+		)
+		return {
+			...response,
+			items: response.items.map((p: any) => this.parsePaste(p)),
+		}
 	}
 
 	async createPaste(paste: PasteNew): Promise<Paste> {
