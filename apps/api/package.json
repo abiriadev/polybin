@@ -15,7 +15,8 @@
 		"kysely-codegen": "^0.20.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
-		"vitest": "^3.0.7"
+		"vitest": "^3.0.7",
+		"wrangler": "^4.105.0"
 	},
 	"dependencies": {
 		"@hono/zod-openapi": "^1.2.2",
